@@ -6,17 +6,33 @@ const Reservation = require("./reservation");
 /** Customer of the restaurant. */
 
 class Customer {
-  constructor({ id, firstName, lastName, phone, notes }) {
+	constructor({ id, firstName, lastName, phone, notes }) {
     this.id = id;
     this.firstName = firstName;
     this.lastName = lastName;
     this.phone = phone;
     this.notes = notes;
-  }
+	}
 
-  /** find all customers. */
+// getting/setting notes
+set notes(val){
+  this._notes = val || "";
+}
+get notes(){
+  return this._notes;
+}
 
-  static async all() {
+//getting n setting phone
+set phone(val){
+  this._phone = val || null;
+}
+get phone(){
+  return this._phone;
+}
+
+/** find all customers. */
+
+static async all() {
     const results = await db.query(
       `SELECT id, 
          first_name AS "firstName",  
@@ -26,12 +42,12 @@ class Customer {
        FROM customers
        ORDER BY last_name, first_name`
     );
-    return results.rows.map(c => new Customer(c));
-  }
+	return results.rows.map(c => new Customer(c));
+}
 
-  /** get a customer by ID. */
+/** get a customer by ID. */
 
-  static async get(id) {
+static async get(id) {
     const results = await db.query(
       `SELECT id, 
          first_name AS "firstName",  
@@ -51,17 +67,21 @@ class Customer {
     }
 
     return new Customer(customer);
-  }
+}
 
-  /** get all reservations for this customer. */
+//get full name
+get fullName(){
+	return `${this.firstName} ${this.lastName}`;
+}
 
-  async getReservations() {
+/** get all reservations for this customer. */
+
+async getReservations() {
     return await Reservation.getReservationsForCustomer(this.id);
-  }
+}
 
-  /** save this customer. */
-
-  async save() {
+/** save this customer. */
+async save() {
     if (this.id === undefined) {
       const result = await db.query(
         `INSERT INTO customers (first_name, last_name, phone, notes)
